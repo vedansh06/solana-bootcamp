@@ -8,7 +8,7 @@ import { BN, Program } from "@coral-xyz/anchor";
 const IDL = require("../target/idl/voting.json");
 import { Voting } from '../target/types/project2voting';
 
-const PUPPET_PROGRAM_ID = new PublicKey("5s3PtT8kLYCv1WEp6dSh3T7EuF35Z6jSu5Cvx4hWG79H");
+const PUPPET_PROGRAM_ID = new PublicKey("8YSAmduPFa5Mmd4uNTgwMF3FHPBMicB65nKfo1fgwc5F");
 
 describe('Create a system account', () => {
 

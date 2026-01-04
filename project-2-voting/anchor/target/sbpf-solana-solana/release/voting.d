@@ -1,0 +1,1 @@
+/home/vedansh/Desktop/solana-bootcamp/project-2-voting/anchor/target/sbpf-solana-solana/release/voting.so: /home/vedansh/Desktop/solana-bootcamp/project-2-voting/anchor/programs/voting/src/lib.rs
