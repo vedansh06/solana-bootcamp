@@ -1,8 +1,13 @@
 // Here we export some useful types and functions for interacting with the Anchor program.
 import { Account, getBase58Decoder, SolanaClient } from 'gill'
 import { getProgramAccountsDecoded } from './helpers/get-program-accounts-decoded'
-import { Project2voting, PROJECT2VOTING_DISCRIMINATOR, PROJECT2VOTING_PROGRAM_ADDRESS, getProject2votingDecoder } from './client/js'
-import Project2votingIDL from '../target/idl/project2voting.json'
+import {
+  Project2voting,
+  PROJECT2VOTING_DISCRIMINATOR,
+  PROJECT2VOTING_PROGRAM_ADDRESS,
+  getProject2votingDecoder,
+} from './client/js'
+import Project2votingIDL from '../target/idl/voting.json'
 
 export type Project2votingAccount = Account<Project2voting, string>
 
