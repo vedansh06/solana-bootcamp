@@ -7,11 +7,18 @@ import { Project2votingUiButtonDecrement } from './project2voting-ui-button-decr
 import { Project2votingUiButtonIncrement } from './project2voting-ui-button-increment'
 import { Project2votingUiButtonSet } from './project2voting-ui-button-set'
 
-export function Project2votingUiCard({ account, project2voting }: { account: UiWalletAccount; project2voting: Project2votingAccount }) {
+export function Project2votingUiCard({
+  account,
+  project2voting,
+}: {
+  account: UiWalletAccount
+  project2voting: Project2votingAccount
+}) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Project2voting: {project2voting.data.count}</CardTitle>
+        <CardTitle>Total Votes: {project2voting.data.count}</CardTitle>
+
         <CardDescription>
           Account: <AppExplorerLink address={project2voting.address} label={ellipsify(project2voting.address)} />
         </CardDescription>

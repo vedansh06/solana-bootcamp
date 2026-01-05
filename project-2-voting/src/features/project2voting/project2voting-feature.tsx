@@ -12,12 +12,12 @@ export default function Project2votingFeature() {
   return (
     <Project2votingUiProgramGuard>
       <AppHero
-        title="Project2voting"
-        subtitle={
-          account
-            ? "Initialize a new project2voting onchain by clicking the button. Use the program's methods (increment, decrement, set, and close) to change the state of the account."
-            : 'Select a wallet to run the program.'
-        }
+        title="Decentralized Polling App"
+subtitle={
+  account
+    ? "Create and manage on-chain polls using Solana."
+    : 'Select a wallet to run the program.'
+}
       >
         <p className="mb-6">
           <Project2votingUiProgramExplorerLink />

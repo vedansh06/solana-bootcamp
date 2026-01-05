@@ -8,7 +8,8 @@ export function Project2votingUiButtonInitialize({ account }: { account: UiWalle
 
   return (
     <Button onClick={() => mutationInitialize.mutateAsync()} disabled={mutationInitialize.isPending}>
-      Initialize Project2voting {mutationInitialize.isPending && '...'}
+      Create New Poll
+      {mutationInitialize.isPending && '...'}
     </Button>
   )
 }
