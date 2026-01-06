@@ -50,3 +50,21 @@ next-env.d.ts
 /anchor/target/.rustc_info.json
 test-ledger
 **/*.rs.bk
+
+# Anchor / Solana
+.anchor/
+target/
+
+# Rust
+**/*.so
+**/*.d
+**/*.rlib
+**/*.rmeta
+.cargo-lock
+CACHEDIR.TAG
+
+# Node
+node_modules/
+
+# OS
+.DS_Store
