@@ -3,26 +3,36 @@ import { useCrudappAccountsQuery } from '@/features/crudapp/data-access/use-crud
 import { UiWalletAccount } from '@wallet-ui/react'
 
 export function CrudappUiList({ account }: { account: UiWalletAccount }) {
-  const crudappAccountsQuery = useCrudappAccountsQuery()
+  const entriesQuery = useCrudappAccountsQuery()
 
-  if (crudappAccountsQuery.isLoading) {
-    return <span className="loading loading-spinner loading-lg"></span>
+  if (entriesQuery.isLoading) {
+    return (
+      <div className="flex justify-center py-8">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    )
   }
 
-  if (!crudappAccountsQuery.data?.length) {
+  if (!entriesQuery.data?.length) {
     return (
-      <div className="text-center">
-        <h2 className={'text-2xl'}>No accounts</h2>
-        No accounts found. Initialize one to get started.
+      <div className="text-center py-8">
+        <h2 className="text-2xl font-semibold">No Journal Entries</h2>
+        <p className="text-muted-foreground mt-2">Create your first journal entry to get started!</p>
       </div>
     )
   }
 
   return (
-    <div className="grid lg:grid-cols-2 gap-4">
-      {crudappAccountsQuery.data?.map((crudapp) => (
-        <CrudappUiCard account={account} key={crudapp.address} crudapp={crudapp} />
-      ))}
+    <div className="space-y-4">
+      <div className="flex justify-between items-center">
+        <h2 className="text-2xl font-bold">Journal Entries</h2>
+        <p className="text-muted-foreground">{entriesQuery.data.length} entries</p>
+      </div>
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {entriesQuery.data.map((entry) => (
+          <CrudappUiCard key={entry.address} account={account} entry={entry} />
+        ))}
+      </div>
     </div>
   )
 }

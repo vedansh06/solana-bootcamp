@@ -1,4 +1,4 @@
-import { useWalletUi } from '@wallet-ui/react'
+import { useWalletUi, useWalletUiCluster } from '@wallet-ui/react'
 import { useWalletUiGill } from '@wallet-ui/react-gill'
 
 /**
@@ -9,9 +9,11 @@ import { useWalletUiGill } from '@wallet-ui/react-gill'
 export function useSolana() {
   const walletUi = useWalletUi()
   const client = useWalletUiGill()
+  const { cluster } = useWalletUiCluster()
 
   return {
     ...walletUi,
     client,
+    cluster,
   }
 }

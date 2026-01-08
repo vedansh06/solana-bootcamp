@@ -1,6 +1,6 @@
 import { useSolana } from '@/components/solana/use-solana'
 import { useQuery } from '@tanstack/react-query'
-import { getCrudappProgramAccounts } from '@project/anchor'
+import { getJournalEntryProgramAccounts } from '@project/anchor'
 import { useCrudappAccountsQueryKey } from './use-crudapp-accounts-query-key'
 
 export function useCrudappAccountsQuery() {
@@ -8,6 +8,6 @@ export function useCrudappAccountsQuery() {
 
   return useQuery({
     queryKey: useCrudappAccountsQueryKey(),
-    queryFn: async () => await getCrudappProgramAccounts(client.rpc),
+    queryFn: async () => await getJournalEntryProgramAccounts(client.rpc),
   })
 }

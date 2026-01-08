@@ -1,7 +1,6 @@
-import { CRUDAPP_PROGRAM_ADDRESS } from '@project/anchor'
 import { AppExplorerLink } from '@/components/app-explorer-link'
-import { ellipsify } from '@wallet-ui/react'
+import { CRUDAPP_PROGRAM_ADDRESS } from '@project/anchor'
 
 export function CrudappUiProgramExplorerLink() {
-  return <AppExplorerLink address={CRUDAPP_PROGRAM_ADDRESS} label={ellipsify(CRUDAPP_PROGRAM_ADDRESS)} />
+  return <AppExplorerLink address={CRUDAPP_PROGRAM_ADDRESS} label={`Program: ${CRUDAPP_PROGRAM_ADDRESS.slice(0, 8)}...`} />
 }

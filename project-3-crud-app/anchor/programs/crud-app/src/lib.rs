@@ -2,7 +2,7 @@
 
 use anchor_lang::prelude::*;
 
-declare_id!("Count3AcZucFDPSFBAeHkQ6AvttieKUkyJ8HiQGhQwe");
+declare_id!("9UJ3q9TiYnuruHuGLLkNiL3xWKxLm5hxSrjCe9UPqvR3");
 
 #[program]
 pub mod crudapp {
@@ -25,39 +25,38 @@ pub mod crudapp {
         _title: String,
         message: String,
     ) -> Result<()> {
-        let journal_entry:&mut Account<JournalEntryState> = &mut ctx.accounts.journal_entry;
+        let journal_entry: &mut Account<JournalEntryState> = &mut ctx.accounts.journal_entry;
         journal_entry.message = message;
         Ok(())
     }
 
-
-        pub fn delete_journal_entry(_ctx: Context<DeleteEntry>, _title: String) -> Result<()> {
-            return Ok(());
-        }
+    pub fn delete_journal_entry(_ctx: Context<DeleteEntry>, _title: String) -> Result<()> {
+        return Ok(());
     }
-    #[derive(Accounts)]
-    #[instruction(title: String)]
+}
+#[derive(Accounts)]
+#[instruction(title: String)]
 
-    pub struct CreateEntry<'info> {
-        #[account(
+pub struct CreateEntry<'info> {
+    #[account(
         init,
         seeds = [title.as_bytes(), owner.key().as_ref()],
         bump,
         space = 8 + JournalEntryState::INIT_SPACE,
         payer = owner,
     )]
-        pub journal_entry: Account<'info, JournalEntryState>,
+    pub journal_entry: Account<'info, JournalEntryState>,
 
-        #[account(mut)]
-        pub owner: Signer<'info>,
+    #[account(mut)]
+    pub owner: Signer<'info>,
 
-        pub system_program: Program<'info, System>,
-    }
-    #[derive(Accounts)]
-    #[instruction(title:String)]
+    pub system_program: Program<'info, System>,
+}
+#[derive(Accounts)]
+#[instruction(title:String)]
 
-    pub struct UpdateEntry<'info> {
-        #[account(
+pub struct UpdateEntry<'info> {
+    #[account(
         mut,
         seeds = [title.as_bytes(),owner.key().as_ref()],
         bump,
@@ -65,37 +64,37 @@ pub mod crudapp {
         realloc::payer = owner,
         realloc::zero = true,
     )]
-        pub journal_entry: Account<'info, JournalEntryState>,
+    pub journal_entry: Account<'info, JournalEntryState>,
 
-        #[account(mut)]
-        pub owner: Signer<'info>,
-        pub system_program: Program<'info, System>,
-    }
-    #[derive(Accounts)]
-    #[instruction(title:String)]
+    #[account(mut)]
+    pub owner: Signer<'info>,
+    pub system_program: Program<'info, System>,
+}
+#[derive(Accounts)]
+#[instruction(title:String)]
 
-    pub struct DeleteEntry<'info> {
-        #[account(
+pub struct DeleteEntry<'info> {
+    #[account(
             mut,
             seeds = [title.as_bytes(), owner.key().as_ref()],
             bump,
             close = owner,
         )]
-        pub journal_entry: Account<'info, JournalEntryState>,
+    pub journal_entry: Account<'info, JournalEntryState>,
 
-        #[account(mut)]
-        pub owner: Signer<'info>,
+    #[account(mut)]
+    pub owner: Signer<'info>,
 
-        pub system_program: Program<'info, System>,
-    }
+    pub system_program: Program<'info, System>,
+}
 
-    #[account]
-    #[derive(InitSpace)]
+#[account]
+#[derive(InitSpace)]
 
-    pub struct JournalEntryState {
-        pub owner: Pubkey,
-        #[max_len(50)]
-        pub title: String,
-        #[max_len(1000)]
-        pub message: String,
-    }
+pub struct JournalEntryState {
+    pub owner: Pubkey,
+    #[max_len(50)]
+    pub title: String,
+    #[max_len(1000)]
+    pub message: String,
+}

@@ -1,20 +1,31 @@
 // Here we export some useful types and functions for interacting with the Anchor program.
 import { Account, getBase58Decoder, SolanaClient } from 'gill'
 import { getProgramAccountsDecoded } from './helpers/get-program-accounts-decoded'
-import { Crudapp, CRUDAPP_DISCRIMINATOR, CRUDAPP_PROGRAM_ADDRESS, getCrudappDecoder } from './client/js'
+import {
+  JournalEntryState,
+  JOURNAL_ENTRY_STATE_DISCRIMINATOR,
+  getJournalEntryStateDecoder,
+  CRUDAPP_PROGRAM_ADDRESS,
+} from './client/js'
 import CrudappIDL from '../target/idl/crudapp.json'
 
-export type CrudappAccount = Account<Crudapp, string>
+export type JournalEntryAccount = Account<JournalEntryState, string>
+
+// Backward compatibility alias
+export type CrudappAccount = JournalEntryAccount
 
 // Re-export the generated IDL and type
-export { CrudappIDL }
+export { CrudappIDL, CRUDAPP_PROGRAM_ADDRESS }
 
 export * from './client/js'
 
-export function getCrudappProgramAccounts(rpc: SolanaClient['rpc']) {
+export function getJournalEntryProgramAccounts(rpc: SolanaClient['rpc']) {
   return getProgramAccountsDecoded(rpc, {
-    decoder: getCrudappDecoder(),
-    filter: getBase58Decoder().decode(CRUDAPP_DISCRIMINATOR),
+    decoder: getJournalEntryStateDecoder(),
+    filter: getBase58Decoder().decode(JOURNAL_ENTRY_STATE_DISCRIMINATOR),
     programAddress: CRUDAPP_PROGRAM_ADDRESS,
   })
 }
+
+// Backward compatibility alias
+export const getCrudappProgramAccounts = getJournalEntryProgramAccounts

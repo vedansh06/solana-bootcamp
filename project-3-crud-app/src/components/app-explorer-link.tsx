@@ -1,6 +1,5 @@
-import { getExplorerLink, GetExplorerLinkArgs } from 'gill'
-import { getSolanaClusterMoniker } from '@wallet-ui/react-gill'
-import { useSolana } from '@/components/solana/use-solana'
+import { getExplorerLink, GetExplorerLinkArgs, SolanaClusterMoniker } from 'gill'
+import { useWalletUiCluster } from '@wallet-ui/react'
 import { ArrowUpRightFromSquare } from 'lucide-react'
 
 export function AppExplorerLink({
@@ -11,10 +10,10 @@ export function AppExplorerLink({
   className?: string
   label: string
 }) {
-  const { cluster } = useSolana()
+  const { cluster } = useWalletUiCluster()
   return (
     <a
-      href={getExplorerLink({ ...link, cluster: getSolanaClusterMoniker(cluster.id) })}
+      href={getExplorerLink({ ...link, cluster: cluster.id as SolanaClusterMoniker })}
       target="_blank"
       rel="noopener noreferrer"
       className={className ? className : `link font-mono inline-flex gap-1`}
