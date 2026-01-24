@@ -83,4 +83,66 @@ export default function Home() {
       setIsAdmin(false);
     }
   };
+
+  const fetchIcoData = async () => {
+    try {
+      const program = getProgram();
+      if (!program) return;
+
+      const accounts = await program.account.data.all();
+      if (accounts.length > 0) {
+        setIcoData(accounts[0].account);
+      }
+    } catch (error) {
+      console.log("Error fetching ICO data:", error);
+    }
+  };
+
+  const createIcoAta = async () => {
+    try {
+      if (!amount || parseInt(amount) <= 0) return alert("Invalid amount");
+      if (!wallet.publicKey) return;
+
+      setLoading(true);
+      const program = getProgram();
+      if (!program) return;
+
+      const [icoAtaPda] = PublicKey.findProgramAddressSync(
+        [ICO_MINT.toBuffer()],
+        program.programId,
+      );
+
+      const [dataPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from("data"), wallet.publicKey.toBuffer()],
+        program.programId,
+      );
+
+      const adminIcoAta = await getAssociatedTokenAddress(
+        ICO_MINT,
+        wallet.publicKey,
+      );
+
+      await program.methods
+        .createIcoAta(new BN(amount))
+        .accounts({
+          icoAtaForIcoProgram: icoAtaPda,
+          data: dataPda,
+          icoMint: ICO_MINT,
+          icoAtaForAdmin: adminIcoAta,
+          admin: wallet.publicKey,
+          systemProgram: SystemProgram.programId,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          rent: SYSVAR_RENT_PUBKEY,
+        })
+        .rpc();
+
+      alert("ICO Initialized");
+      await fetchIcoData();
+    } catch (error) {
+      alert(`Error: ${error.toString()}`);
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
 }
