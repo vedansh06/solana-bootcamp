@@ -191,4 +191,90 @@ export default function Home() {
       setLoading(false);
     }
   };
+
+  const buyTokens = async () => {
+    try {
+      if (!amount || parseInt(amount) <= 0) return alert("Invalid amount");
+      if (!wallet.publicKey || !icoData) return;
+
+      setLoading(true);
+      const program = getProgram();
+      if (!program) return;
+
+      const solCost = parseInt(amount) * 0.001;
+      const balance = await connection.getBalance(wallet.publicKey);
+
+      if (balance < solCost * 1e9 + 5000)
+        return alert(`Need ${solCost} SOL + fee`);
+
+      const [icoAtaPda, bump] = PublicKey.findProgramAddressSync(
+        [ICO_MINT.toBuffer()],
+        program.programId,
+      );
+
+      const [dataPda] = PublicKey.findProgramAddressSync(
+        [Buffer.from("data"), icoData.admin.toBuffer()],
+        program.programId,
+      );
+
+      const userAta = await getAssociatedTokenAddress(
+        ICO_MINT,
+        wallet.publicKey,
+      );
+
+      try {
+        await getAccount(connection, userAta);
+      } catch {
+        const ix = createAssociatedTokenAccountInstruction(
+          wallet.publicKey,
+          userAta,
+          wallet.publicKey,
+          ICO_MINT,
+        );
+        const tx = new Transaction().add(ix);
+        await wallet.sendTransaction(tx, connection);
+      }
+
+      await program.methods
+        .buyTokens(bump, new BN(amount))
+        .accounts({
+          icoAtaForIcoProgram: icoAtaPda,
+          data: dataPda,
+          icoMint: ICO_MINT,
+          icoAtaForUser: userAta,
+          user: wallet.publicKey,
+          admin: icoData.admin,
+          tokenProgram: TOKEN_PROGRAM_ID,
+          systemProgram: SystemProgram.programId,
+        })
+        .rpc();
+
+      alert(`Purchased ${amount}`);
+      fetchUserTokenBalance();
+    } catch (error) {
+      alert(`Error: ${error.toString()}`);
+      console.log(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchUserTokenBalance = async () => {
+    if (!wallet.publicKey) return;
+    try {
+      const userAta = await getAssociatedTokenAddress(
+        ICO_MINT,
+        wallet.publicKey,
+      );
+      try {
+        const tokenAccount = await getAccount(connection, userAta);
+        setUserTokenBalance(tokenAccount.amount.toString());
+      } catch {
+        setUserTokenBalance("0");
+      }
+    } catch (e) {
+      console.log(e);
+      setUserTokenBalance("0");
+    }
+  };
 }
