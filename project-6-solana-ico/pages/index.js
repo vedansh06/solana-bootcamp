@@ -15,6 +15,8 @@ import {
   getAccount,
 } from "@solana/spl-token";
 import IDL from "../idl/idl.json";
+import Navbar from "../components/Navbar";
+import HeroSection from "../components/HeroSection";
 
 const WalletMultiButton = dynamic(
   () =>
@@ -277,4 +279,25 @@ export default function Home() {
       setUserTokenBalance("0");
     }
   };
+
+  return (
+    <div>
+      <Navbar />
+      <main>
+        <HeroSection
+          wallet={wallet}
+          isAdmin={isAdmin}
+          loading={loading}
+          icoData={icoData}
+          amount={amount}
+          userSolBalance={userTokenBalance}
+          userTokenBalance={userTokenBalance}
+          setAmount={setAmount}
+          createIcoAta={createIcoAta}
+          depositIco={depositIco}
+          buyTokens={buyTokens}
+        />
+      </main>
+    </div>
+  );
 }
