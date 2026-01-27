@@ -1,3 +1,4 @@
+// pages/index.js - UPDATED
 import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useWallet, useConnection } from "@solana/wallet-adapter-react";
@@ -17,6 +18,11 @@ import {
 import IDL from "../idl/idl.json";
 import Navbar from "../components/Navbar";
 import HeroSection from "../components/HeroSection";
+import Tokenomics from "../components/Tokenomics";
+import Roadmap from "../components/Roadmap";
+import Features from "../components/Features";
+import FAQ from "../components/FAQ";
+import Footer from "../components/Footer";
 
 const WalletMultiButton = dynamic(
   () =>
@@ -49,8 +55,13 @@ export default function Home() {
       checkIfAdmin();
       fetchIcoData();
       fetchUserTokenBalance();
+    } else {
+      // Reset state when wallet disconnects
+      setIsAdmin(false);
+      setIcoData(null);
+      setUserTokenBalance("0");
     }
-  }, [wallet.connected]);
+  }, [wallet.connected, wallet.publicKey]);
 
   const getProgram = () => {
     if (!wallet.connected) return null;
@@ -89,25 +100,38 @@ export default function Home() {
   const fetchIcoData = async () => {
     try {
       const program = getProgram();
-      if (!program) return;
+      if (!program || !wallet.publicKey) return;
 
       const accounts = await program.account.data.all();
+      console.log("Fetched ICO accounts:", accounts);
+
       if (accounts.length > 0) {
         setIcoData(accounts[0].account);
+        console.log("ICO Data set:", accounts[0].account);
+      } else {
+        setIcoData(null);
+        console.log("No ICO data found");
       }
     } catch (error) {
       console.log("Error fetching ICO data:", error);
+      setIcoData(null);
     }
   };
 
   const createIcoAta = async () => {
     try {
-      if (!amount || parseInt(amount) <= 0) return alert("Invalid amount");
+      if (!amount || parseInt(amount) <= 0) {
+        alert("Please enter a valid token amount (e.g., 1000000)");
+        return;
+      }
       if (!wallet.publicKey) return;
 
       setLoading(true);
       const program = getProgram();
-      if (!program) return;
+      if (!program) {
+        setLoading(false);
+        return;
+      }
 
       const [icoAtaPda] = PublicKey.findProgramAddressSync(
         [ICO_MINT.toBuffer()],
@@ -124,8 +148,54 @@ export default function Home() {
         wallet.publicKey,
       );
 
+      // Check if admin's token account exists, if not create it
+      let tokenAccountInfo;
+      try {
+        tokenAccountInfo = await getAccount(connection, adminIcoAta);
+        console.log(
+          "Admin token account exists. Balance:",
+          tokenAccountInfo.amount.toString(),
+        );
+
+        // Check if admin has enough tokens
+        const tokenBalance = Number(tokenAccountInfo.amount);
+        const requiredAmount = parseInt(amount) * 1e9; // Convert to base units (9 decimals)
+
+        console.log(
+          `Token balance: ${tokenBalance}, Required: ${requiredAmount}`,
+        );
+
+        if (tokenBalance < requiredAmount) {
+          alert(
+            `❌ Insufficient tokens! You have ${(tokenBalance / 1e9).toFixed(2)} tokens but need ${parseInt(amount)}.\n\nYou need ${((requiredAmount - tokenBalance) / 1e9).toFixed(2)} more tokens.`,
+          );
+          setLoading(false);
+          return;
+        }
+
+        console.log("✓ Sufficient token balance confirmed");
+      } catch (error) {
+        console.log("Creating admin token account...");
+        const createAtaIx = createAssociatedTokenAccountInstruction(
+          wallet.publicKey,
+          adminIcoAta,
+          wallet.publicKey,
+          ICO_MINT,
+        );
+        const createAtaTx = new Transaction().add(createAtaIx);
+        const signature = await wallet.sendTransaction(createAtaTx, connection);
+        await connection.confirmTransaction(signature, "confirmed");
+        console.log("Admin token account created");
+
+        alert(
+          `✓ Token account created!\n\nYou have ${(Number(tokenAccountInfo.amount) / 1e9).toFixed(2)} tokens available.\n\nYou can now initialize the ICO.`,
+        );
+      }
+
+      const amountBN = new BN(parseInt(amount) * 1e9); // Convert to base units
+
       await program.methods
-        .createIcoAta(new BN(amount))
+        .createIcoAta(amountBN)
         .accounts({
           icoAtaForIcoProgram: icoAtaPda,
           data: dataPda,
@@ -138,11 +208,24 @@ export default function Home() {
         })
         .rpc();
 
-      alert("ICO Initialized");
+      alert("✅ ICO Successfully Initialized!");
+      setAmount("");
+      // Fetch ICO data again to update UI
+      await new Promise((resolve) => setTimeout(resolve, 1000));
       await fetchIcoData();
     } catch (error) {
-      alert(`Error: ${error.toString()}`);
-      console.log(error);
+      console.error("Full error:", error);
+      let errorMessage = "Failed to initialize ICO";
+
+      if (error.message) {
+        if (error.message.includes("already initialized")) {
+          errorMessage = "ICO is already initialized";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      alert(`❌ Error: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -150,12 +233,22 @@ export default function Home() {
 
   const depositIco = async () => {
     try {
-      if (!amount || parseInt(amount) <= 0) return alert("Invalid amount");
+      if (!amount || parseInt(amount) <= 0) {
+        alert("Please enter a valid deposit amount");
+        return;
+      }
       if (!wallet.publicKey) return;
+      if (!icoData) {
+        alert("ICO not initialized. Please initialize first.");
+        return;
+      }
 
       setLoading(true);
       const program = getProgram();
-      if (!program) return;
+      if (!program) {
+        setLoading(false);
+        return;
+      }
 
       const [icoAtaPda] = PublicKey.findProgramAddressSync(
         [ICO_MINT.toBuffer()],
@@ -172,8 +265,10 @@ export default function Home() {
         wallet.publicKey,
       );
 
+      const amountBN = new BN(parseInt(amount));
+
       await program.methods
-        .depositIcoInAta(new BN(amount))
+        .depositIcoInAta(amountBN)
         .accounts({
           icoAtaForIcoProgram: icoAtaPda,
           data: dataPda,
@@ -184,11 +279,25 @@ export default function Home() {
         })
         .rpc();
 
-      alert("Deposited");
+      alert("✅ Tokens Successfully Deposited!");
       await fetchIcoData();
+      setAmount("");
     } catch (error) {
-      alert(`Error: ${error.toString()}`);
-      console.log(error);
+      console.error("Full error:", error);
+      let errorMessage = "Failed to deposit tokens";
+
+      if (error.message) {
+        if (error.message.includes("AccountNotInitialized")) {
+          errorMessage =
+            "ICO account not initialized. Please initialize ICO first.";
+        } else if (error.message.includes("insufficient")) {
+          errorMessage = "Insufficient token balance in your wallet";
+        } else {
+          errorMessage = error.message;
+        }
+      }
+
+      alert(`❌ Error: ${errorMessage}`);
     } finally {
       setLoading(false);
     }
@@ -281,7 +390,7 @@ export default function Home() {
   };
 
   return (
-    <div>
+    <div className="bg-gray-900">
       <Navbar />
       <main>
         <HeroSection
@@ -297,7 +406,12 @@ export default function Home() {
           depositIco={depositIco}
           buyTokens={buyTokens}
         />
+        <Tokenomics />
+        <Roadmap />
+        <Features />
+        <FAQ />
       </main>
+      <Footer />
     </div>
   );
 }
